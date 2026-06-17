@@ -1,0 +1,39 @@
+# Sovereign AgentOps — Community Edition (Docker Compose demo)
+# Quick start: docker compose up --build
+# Then test: echo '{"jsonrpc":"2.0","id":1,"method":"list_tools"}' \
+#   | docker exec -i agentops-demo python3 tools/mcp-server.py
+
+version: "3.9"
+
+services:
+  # Minimal MCP server with workspace policy demo
+  agentops-demo:
+    build:
+      context: ..           # parent so we can COPY tools/
+      dockerfile: community/Dockerfile
+    container_name: agentops-demo
+
+    # MCP uses stdio, but port 8080 hints at future HTTP gateway
+    ports:
+      - "8080:8080"
+
+    environment:
+      - DEMO_MODE=true            # enables policy enforcement mode
+      - WORKSPACE_ROOT=/workspace # simulated workspace jail root
+
+    # Bind-mount examples into workspace for policy tool inspection
+    volumes:
+      - ./examples:/workspace/examples
+
+    stdin_open: true
+    tty: true
+
+    # Health check: list_tools must return a valid JSON-RPC response
+    healthcheck:
+      test: >
+        sh -c 'echo "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"list_tools\"}"
+        | python3 tools/mcp-server.py | grep -q "\"result\""'
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 2s

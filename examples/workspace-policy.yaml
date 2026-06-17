@@ -1,0 +1,121 @@
+# =============================================================================
+# Sovereign AgentOps — Workspace Policy
+# =============================================================================
+# Each workspace in the governed execution layer has an associated policy that
+# defines what commands, paths, and patterns are allowed or blocked.  All four
+# agent runtimes (Claude Code, OpenCode, Direct MCP clients, Workflow Engine)
+# enforce the same policy — policy is runtime-agnostic.
+#
+# Fields:
+#   workspace_id       Unique identifier for the workspace
+#   name               Human-readable name
+#   allowed_root       Filesystem jail root; agents may not escape this prefix
+#   allowed_commands   Commands permitted without restriction
+#   blocked_commands   Commands rejected at the MCP tool layer
+#   blocked_paths      Filesystem paths that may not be read or written
+#   dangerous_patterns Shell patterns that trip a block regardless of command
+#   max_runtime_seconds Hard timeout for any single agent action
+#   audit_level        One of: none, command, arguments, all
+# =============================================================================
+
+workspace_id: wksp-demo-001
+name: Demo Workspace
+
+# --- Filesystem jail --------------------------------------------------------
+# All file operations are confined to this directory tree.  Paths outside it
+# are rejected even if they are not in the explicit blocked list below.
+allowed_root: /home/user/projects
+
+# --- Allowed commands -------------------------------------------------------
+# These commands may be executed freely inside the workspace jail.  Arguments
+# are still subject to dangerous-pattern checks.
+allowed_commands:
+  - git
+  - npm
+  - python3
+  - pip
+  - ls
+  - cat
+  - head
+  - tail
+  - grep
+  - curl
+  - wget
+  - make
+  - docker compose
+  - kubectl
+
+# --- Blocked commands -------------------------------------------------------
+# Any command invocation whose base name matches an entry here is rejected at
+# the MCP tool layer before execution begins.
+blocked_commands:
+  - sudo
+  - doas
+  - su
+  - rm -rf           # use safer alternatives (rmdir, trash-cli)
+  - chmod 777
+  - chown
+  - passwd
+  - systemctl
+  - journalctl
+  - mount
+  - umount
+  - dd
+  - mkfs
+  - fdisk
+  - iptables
+  - shutdown
+  - reboot
+  - halt
+
+# --- Blocked paths ----------------------------------------------------------
+# Reads or writes targeting these paths are intercepted and rejected.  Globs
+# are not supported — list explicit prefixes.
+blocked_paths:
+  - /etc/shadow
+  - /etc/gshadow
+  ###########################################################################
+  # WARNING: Do NOT block /etc/ssh — that would also block .ssh in the user
+  # home dir on most systems.  Only the exact path is matched.
+  ###########################################################################
+  - /etc/ssh/sshd_config
+  - /etc/sudoers
+  - /etc/sudoers.d
+  - /proc
+  - /sys
+  - /dev
+  - /boot
+  - /root
+  - /var/log/auth.log
+  - /var/log/secure
+  - /var/log/syslog
+
+# --- Dangerous patterns -----------------------------------------------------
+# Argument patterns that trigger an immediate block regardless of the command.
+# These use substring matching against the full command line.
+dangerous_patterns:
+  - "rm -rf /"                   # destructive recursive delete from root
+  - "rm -rf /*"                  # same, with glob
+  - ":(){ :|:& };:"              # fork bomb (bash)
+  - "> /dev/sda"                 # raw block-device write
+  - "| bash"                     # pipe-to-shell (arbitrary code execution)
+  - "curl ... | sh"              # remote pipe-to-shell
+  - "wget ... | sh"              # remote pipe-to-shell
+  - "eval $"                     # dynamic eval injection
+  - "$(wget "                    # command substitution with remote fetch
+  - "$(curl "                    # command substitution with remote fetch
+  - "chmod -R 777 /"             # world-writable filesystem
+
+# --- Runtime limits ---------------------------------------------------------
+# Hard timeout applied at the MCP tool layer.  If a command exceeds this
+# limit it is killed and the execution receipt records a timeout.
+max_runtime_seconds: 300
+
+# --- Audit level ------------------------------------------------------------
+# Controls verbosity of the execution receipt written after every action.
+#   none      — no receipt generated
+#   command   — receipt includes command name only
+#   arguments — receipt includes command + positional arguments
+#   all       — receipt includes full command line, environment, and policy
+#               decision context
+audit_level: all
