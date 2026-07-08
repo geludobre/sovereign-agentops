@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "sovereign-agentops-community"
+version = "2.0.0"
+description = "Runtime-agnostic governed agent execution — Community Edition"
+readme = "README.md"
+license = {file = "LICENSE.community"}
+requires-python = ">=3.10"
+dependencies = [
+    "cryptography>=41.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/FinBridge/sovereign-agentops"
+Documentation = "https://github.com/FinBridge/sovereign-agentops/tree/main/community/docs"
+Source = "https://github.com/FinBridge/sovereign-agentops"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+]
+test = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["tools*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --tb=short"
+
+[tool.coverage.run]
+source = ["tools"]
+omit = ["tests/*"]

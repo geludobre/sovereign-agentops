@@ -1,49 +1,97 @@
 #!/usr/bin/env python3
 """
-Minimal MCP (Model Context Protocol) Demo Server — Community Edition
+Standalone MCP (Model Context Protocol) Governance Server — Community Edition
 
-Provides 6 demonstration tools that illustrate the governed-agent concept:
-    demo_policy_check   — simulated command policy enforcement
-    demo_receipt_sign   — Ed25519-style execution receipt signing
+Provides 6 tools that demonstrate runtime-agnostic governed agent execution:
+
+    demo_policy_check   — real policy enforcement with allow/block/detect
+    demo_receipt_sign   — Ed25519-signed execution receipts (real crypto)
     demo_receipt_verify — receipt signature verification
     demo_model_route    — local model routing (ollama / lm-studio)
     demo_workspace_jail — workspace path confinement check
-    demo_audit_log      — simulated audit-log replay
+    demo_audit_log      — signed audit-log replay from memory
 
 Protocol: JSON-RPC 2.0 over stdin/stdout (one JSON object per line).
-No external dependencies — Python 3.10+ stdlib only.
+Requires: cryptography>=41.0.0  (pip install cryptography)
 """
-
 from __future__ import annotations
 
-import hashlib
 import json
+import os
 import sys
 import time
 import uuid
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-
 # ---------------------------------------------------------------------------
-# Minimal Ed25519-style signing (demonstration only — NOT production crypto)
+# Ed25519 signing (real crypto, not demo)
 # ---------------------------------------------------------------------------
 
-_SIGNING_KEY = hashlib.sha256(b"demo-community-edition-seed-2026").hexdigest()[:64]
+try:
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import (
+        Ed25519PrivateKey,
+        Ed25519PublicKey,
+    )
+except ImportError:
+    print(
+        "Error: 'cryptography' package required.\n"
+        "  pip install cryptography>=41.0.0",
+        file=sys.stderr,
+    )
+    sys.exit(1)
 
 
-def _demo_sign(payload: Dict[str, Any]) -> str:
-    """Return a deterministic hex signature over the canonical JSON of *payload*."""
-    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
-    return hashlib.sha256(
-        hashlib.sha256(canonical.encode()).hexdigest().encode()
-        + _SIGNING_KEY.encode()
-    ).hexdigest()
+def _canonical(obj: Dict[str, Any]) -> bytes:
+    """Deterministic JSON — sorted keys, no whitespace."""
+    return json.dumps(obj, sort_keys=True, separators=(",", ":")).encode()
 
 
-def _demo_verify(signature: str, payload: Dict[str, Any]) -> bool:
-    """Return *True* if *signature* matches *payload* under the demo key."""
-    return _demo_sign(payload) == signature
+def _load_or_generate_key(key_path: Path) -> Ed25519PrivateKey:
+    """Load an existing Ed25519 private key or generate + persist a new one."""
+    if key_path.exists():
+        raw = key_path.read_bytes()
+        if len(raw) == 64:
+            return Ed25519PrivateKey.from_private_bytes(raw)
+        if len(raw) == 32:
+            # Seed-only format (32 bytes) — expand on load.
+            return Ed25519PrivateKey.from_private_bytes(raw)
+        raise ValueError(f"Invalid key file: {key_path} ({len(raw)} bytes)")
+
+    key_path.parent.mkdir(parents=True, exist_ok=True)
+    priv = Ed25519PrivateKey.generate()
+    key_path.write_bytes(priv.private_bytes_raw())
+    key_path.chmod(0o400)  # keep permissions tight
+    return priv
+
+
+# Key file path — use AGENTOPS_KEY_DIR env var or default
+_KEY_DIR = Path(os.environ.get("AGENTOPS_KEY_DIR", Path.home() / ".config" / "agentops"))
+_KEY_FILE = _KEY_DIR / "ed25519_private.key"
+_PRIV_KEY: Ed25519PrivateKey = _load_or_generate_key(_KEY_FILE)
+_PUB_KEY: Ed25519PublicKey = _PRIV_KEY.public_key()
+_PUB_KEY_HEX: str = _PUB_KEY.public_bytes_raw().hex()
+
+
+def _sign(payload: Dict[str, Any]) -> str:
+    """Return an Ed25519 signature over the canonical JSON of *payload*.
+
+    Returns a hex-encoded 64-byte Ed25519 signature.
+    """
+    return _PRIV_KEY.sign(_canonical(payload)).hex()
+
+
+def _verify(signature: str, payload: Dict[str, Any]) -> bool:
+    """Return *True* if *signature* matches *payload* under the server's key."""
+    sig_bytes = bytes.fromhex(signature)
+    if len(sig_bytes) != 64:
+        return False
+    try:
+        _PUB_KEY.verify(sig_bytes, _canonical(payload))
+        return True
+    except Exception:
+        return False
 
 
 # ---------------------------------------------------------------------------
@@ -71,7 +119,7 @@ class Tool:
 # Tool implementations
 # ---------------------------------------------------------------------------
 
-# -- Simulated audit log (appended by demo_receipt_sign) ----------------
+# -- In-memory signed audit log ---------------------------------------------
 _audit_log: List[Dict[str, Any]] = []
 
 _DANGEROUS_PATTERNS = (
@@ -86,7 +134,7 @@ _BLOCKED_COMMANDS_PREFIXES = (
 
 
 def _run_policy_check(command: str, path: str) -> Dict[str, Any]:
-    """Simulate policy evaluation for *command* operating on *path*."""
+    """Evaluate whether *command* operating on *path* is allowed by policy."""
     command_lower = command.strip().lower()
 
     for pattern in _DANGEROUS_PATTERNS:
@@ -124,24 +172,37 @@ def _run_policy_check(command: str, path: str) -> Dict[str, Any]:
 
 
 def _run_receipt_sign(action: str, target: str) -> Dict[str, Any]:
-    """Create a signed execution receipt for *action* on *target*."""
+    """Create an Ed25519-signed execution receipt for *action* on *target*."""
     receipt: Dict[str, Any] = {
-        "receipt_id": str(uuid.uuid4()),
-        "timestamp": time.time(),
+        "schema_version": "1.0",
+        "run_id": str(uuid.uuid4()),
+        "workspace_id": "community-demo",
+        "actor": "community-user",
+        "agent_runtime": "direct-mcp",
+        "tool": "demo_receipt_sign",
         "action": action,
         "target": target,
-        "status": "simulated",
+        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "policy_decision": "signed",
     }
-    receipt["signature"] = _demo_sign(receipt)
 
-    # Append to the in-memory audit log.
+    # Ed25519 hex signature over the canonical receipt (without the signature field)
+    sig_hex = _sign(receipt)
+    receipt["signature"] = sig_hex
+
+    # Append to in-memory audit log
     _audit_log.append(dict(receipt))
 
-    return {"receipt": receipt, "signed": True}
+    return {
+        "receipt": receipt,
+        "signed": True,
+        "public_key_hex": _PUB_KEY_HEX,
+        "key_path": str(_KEY_FILE),
+    }
 
 
 def _run_receipt_verify(receipt_json: str) -> Dict[str, Any]:
-    """Parse and verify a signed receipt from its JSON representation."""
+    """Parse and Ed25519-verify a signed receipt from its JSON representation."""
     try:
         data = json.loads(receipt_json)
     except json.JSONDecodeError as exc:
@@ -150,12 +211,16 @@ def _run_receipt_verify(receipt_json: str) -> Dict[str, Any]:
     signature = data.pop("signature", None)
     if signature is None:
         return {"valid": False, "error": "No 'signature' field in receipt"}
+    if isinstance(signature, str) and signature.startswith("ed25519:"):
+        # Support the ed25519:hex format used by the CLI verify tool
+        signature = signature[8:]
 
-    is_valid = _demo_verify(signature, data)
+    is_valid = _verify(signature, data)
     return {
         "valid": is_valid,
         "parsed": data,
-        "signature": signature,
+        "signature_hex": signature,
+        "public_key_hex": _PUB_KEY_HEX,
     }
 
 
@@ -179,7 +244,7 @@ def _run_model_route(prompt: str, provider: str) -> Dict[str, Any]:
             "error": f"Unknown provider {provider!r}; expected ollama or lm-studio",
         }
 
-    # Simulate a trivial routing heuristic.
+    # Trivial routing heuristic.
     if len(prompt_lower.split()) > 50:
         routed_model = f"{cfg['model']}-longctx"
     elif any(kw in prompt_lower for kw in ("analyze", "audit", "explain", "review")):
@@ -192,19 +257,15 @@ def _run_model_route(prompt: str, provider: str) -> Dict[str, Any]:
         "endpoint": cfg["endpoint"],
         "base_model": cfg["model"],
         "routed_model": routed_model,
-        "prompt_preview": prompt[:80] + ("…" if len(prompt) > 80 else ""),
+        "prompt_preview": prompt[:80] + ("\N{HORIZONTAL ELLIPSIS}" if len(prompt) > 80 else ""),
     }
 
 
 def _run_workspace_jail(path: str, allowed_root: str) -> Dict[str, Any]:
     """Check whether *path* is confined beneath *allowed_root*."""
-    import os.path
-
     abs_path = os.path.abspath(os.path.expanduser(path))
     abs_root = os.path.abspath(os.path.expanduser(allowed_root))
 
-    # The path must be a child (or the same as) the allowed root.
-    # Normalise both so trailing slashes don't cause false negatives.
     norm_path = os.path.normpath(abs_path)
     norm_root = os.path.normpath(abs_root)
 
@@ -224,13 +285,14 @@ def _run_workspace_jail(path: str, allowed_root: str) -> Dict[str, Any]:
     }
 
 
-def _run_audit_log(limit: int) -> Dict[str, Any]:
-    """Return the *limit* most recent entries from the in-memory audit log."""
+def _run_audit_log(limit: int = 5) -> Dict[str, Any]:
+    """Return the *limit* most recent entries from the in-memory signed audit log."""
     entries = list(reversed(_audit_log))[:limit]
     return {
         "entries": entries,
         "total_logged": len(_audit_log),
         "returned": len(entries),
+        "public_key_hex": _PUB_KEY_HEX,
     }
 
 
@@ -264,8 +326,9 @@ TOOLS: List[Tool] = [
     Tool(
         name="demo_receipt_sign",
         description=(
-            "Create and sign an execution receipt for a simulated action. "
-            "The receipt is recorded in the in-memory audit log."
+            "Create and sign an execution receipt using Ed25519 (real crypto). "
+            "The receipt is recorded in the in-memory audit log and includes "
+            "the server's public key for external verification."
         ),
         parameters={
             "type": "object",
@@ -286,7 +349,7 @@ TOOLS: List[Tool] = [
     Tool(
         name="demo_receipt_verify",
         description=(
-            "Verify the Ed25519-style signature on a previously signed "
+            "Verify the Ed25519 signature on a previously signed "
             "execution receipt. Supply the receipt as a JSON string."
         ),
         parameters={
@@ -349,8 +412,9 @@ TOOLS: List[Tool] = [
     Tool(
         name="demo_audit_log",
         description=(
-            "Return recent entries from the in-memory audit log. "
-            "Entries are added by demo_receipt_sign."
+            "Return recent entries from the in-memory signed audit log. "
+            "Entries are added by demo_receipt_sign and include Ed25519 "
+            "signatures verifiable with the returned public key."
         ),
         parameters={
             "type": "object",
@@ -366,6 +430,27 @@ TOOLS: List[Tool] = [
             "required": [],
         },
         handler=_run_audit_log,
+    ),
+    Tool(
+        name="demo_server_info",
+        description=(
+            "Return server metadata: version, public key, tool count, "
+            "and key storage location."
+        ),
+        parameters={
+            "type": "object",
+            "properties": {},
+            "required": [],
+        },
+        handler=lambda: {
+            "version": "2.0.0",
+            "edition": "community",
+            "tool_count": len(TOOLS),
+            "public_key_hex": _PUB_KEY_HEX,
+            "key_path": str(_KEY_FILE),
+            "crypto": "Ed25519 (RFC 8032)",
+            "protocol": "MCP JSON-RPC 2.0",
+        },
     ),
 ]
 
@@ -399,8 +484,14 @@ def _json_rpc_result(req_id: Optional[Any], result: Any) -> Dict[str, Any]:
 # Request dispatcher
 # ---------------------------------------------------------------------------
 
-def _handle_request(req: Dict[str, Any]) -> Dict[str, Any]:
-    """Dispatch a single JSON-RPC request and return the response."""
+def _handle_request(req: Any) -> Any:
+    """Dispatch a JSON-RPC request and return the response.
+
+    Accepts both single requests (dict) and batch requests (list).
+    """
+    if isinstance(req, list):
+        return [_handle_request(r) for r in req]
+
     req_id = req.get("id")
     method = req.get("method", "")
     params = req.get("params", {})
@@ -456,12 +547,22 @@ def _handle_request(req: Dict[str, Any]) -> Dict[str, Any]:
 def main() -> None:
     """Read JSON-RPC requests from stdin and write responses to stdout.
 
-    The server logs diagnostic messages to stderr so they do not corrupt
-    the JSON-line protocol on stdout.
+    Diagnostic messages go to stderr so they do not corrupt the JSON-line
+    protocol on stdout.
     """
-    # Signal readiness (stderr avoids polluting the protocol stream).
     tool_names = ", ".join(t.name for t in TOOLS)
-    print(f"[demo-mcp] ready — {len(TOOLS)} tool(s): {tool_names}", file=sys.stderr)
+    print(
+        f"[community-mcp] Ed25519 key: {_KEY_FILE}",
+        file=sys.stderr,
+    )
+    print(
+        f"[community-mcp] Public key: {_PUB_KEY_HEX[:16]}...{_PUB_KEY_HEX[-8:]}",
+        file=sys.stderr,
+    )
+    print(
+        f"[community-mcp] ready — {len(TOOLS)} tool(s): {tool_names}",
+        file=sys.stderr,
+    )
 
     for line in sys.stdin:
         line = line.strip()
@@ -478,7 +579,6 @@ def main() -> None:
             sys.stdout.flush()
             continue
 
-        # Support batch requests (list of requests).
         if isinstance(request, list):
             response = [_handle_request(req) for req in request]
             sys.stdout.write(json.dumps(response) + "\n")

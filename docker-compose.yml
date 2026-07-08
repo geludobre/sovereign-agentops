@@ -1,7 +1,7 @@
 # Sovereign AgentOps — Community Edition (Docker Compose demo)
 # Quick start: docker compose up --build
 # Then test: echo '{"jsonrpc":"2.0","id":1,"method":"list_tools"}' \
-#   | docker exec -i agentops-demo python3 tools/mcp-server.py
+#   | docker exec -i agentops-demo python3 tools/mcp_server.py
 
 version: "3.9"
 
@@ -32,7 +32,7 @@ services:
     healthcheck:
       test: >
         sh -c 'echo "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"list_tools\"}"
-        | python3 tools/mcp-server.py | grep -q "\"result\""'
+        | python3 tools/mcp_server.py | grep -q "\"result\""'
       interval: 10s
       timeout: 5s
       retries: 3

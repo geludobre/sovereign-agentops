@@ -1,0 +1,13 @@
+# Path: .dockerignore
+# Keep the Docker build context lean
+.git/
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+Thumbs.db
+.env
+*.env
+.github/
+tests/
+node_modules/

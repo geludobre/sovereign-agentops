@@ -1,1 +1,1 @@
-# No external dependencies required — uses Python 3.10+ stdlib only
+cryptography>=41.0.0

@@ -1,5 +1,10 @@
 # Security Model
 
+> **Note:** This document describes the Enterprise platform security architecture.
+> The Community Edition implements the core cryptographic verification concept
+> (real Ed25519 signing and verification) but does not include the full
+> defense-in-depth stack described below.
+
 ## Overview
 
 Sovereign AgentOps follows a defense-in-depth approach with local-first deployment, default-deny auth, workspace isolation, and cryptographic audit. The security model assumes the deployment environment is trusted (your hardware, your network) and focuses on preventing agent actions from violating operational policy.
@@ -14,7 +19,7 @@ Key properties:
 - Receipt database never leaves the host
 - Full offline operation with local LLMs (Ollama, LM Studio)
 
-## Authentication
+## Authentication (Enterprise)
 
 ### Default-Deny Principle
 
@@ -36,53 +41,63 @@ Progressive delay and lockout:
 - 10 failed attempts: 15-minute lockout
 - 20 failed attempts: 1-hour lockout
 
-## Workspace Policy Enforcement
+## Workspace Policy Enforcement (Community + Enterprise)
 
-The `aug_workspace_policy` MCP tool controls what actions agents can perform:
+The Community Edition's `demo_policy_check` tool demonstrates policy enforcement concepts:
 
-| Control | Description |
-|---------|-------------|
-| Command allowlist | Explicitly permitted commands and patterns |
-| Command blocklist | Forbidden commands (e.g., sudo, raw rm -rf) |
-| Path jail | Restrict file system access to allowed directories |
-| Dangerous pattern detection | Regex-based shell injection and abuse detection |
+| Control | Community | Enterprise |
+|---------|-----------|------------|
+| Command allowlist | Static rules in code | Configurable per-workspace |
+| Command blocklist | Predefined dangerous patterns | Custom blocklists |
+| Path jail | Functional directory check | Full workspace isolation |
+| Dangerous pattern detection | Fork bomb, rm -rf /, sudo | Regex-based + ML detection |
 
-Policies apply at the MCP layer and are runtime-agnostic -- they block actions regardless of which agent runtime initiated them. Policy violations are logged and trigger a signed receipt documenting the blocked action.
+Policies apply at the MCP layer and are runtime-agnostic -- they block actions regardless of which agent runtime initiated them.
 
-## Execution Receipts
+## Execution Receipts (Community + Enterprise)
 
 Every agent action produces a cryptographically signed receipt:
 
-- **Signing algorithm:** Ed25519
-- **Chain structure:** Each receipt includes the SHA-256 hash of the previous receipt, forming a tamper-evident chain
-- **Persistence:** SQLite-backed with export capability
-- **Verification:** The `aug_receipt` MCP tool exposes verify, stats, and export actions
+- **Signing algorithm:** Ed25519 (RFC 8032) — **real crypto, same in both editions**
+- **Chain structure:** Enterprise: each receipt includes the SHA-256 hash of the previous receipt. Community: standalone receipt verification
+- **Persistence:** Enterprise: SQLite-backed. Community: in-memory audit log
+- **Verification:** Both editions expose verification tools. Community: `demo_receipt_verify` MCP tool + `cli/receipt-verify.py`
 
 ### What a receipt contains
 
-- Tool name and arguments
-- Timestamp and actor identity
-- Result or error
-- Previous receipt hash (chain link)
-- Ed25519 signature
-- Receipt status (valid, tampered, revoked)
+The Community Edition receipt schema (`schema_version: 1.0`):
+
+- `run_id` (UUID)
+- `workspace_id` (always `community-demo`)
+- `actor` (always `community-user`)
+- `agent_runtime` (always `direct-mcp`)
+- `tool` — name of the MCP tool
+- `action` — action performed
+- `target` — target of the action
+- `timestamp` — ISO 8601 UTC
+- `policy_decision` — policy result
+- `signature` — Ed25519 hex signature over the canonical receipt
+
+Enterprise receipts add: previous receipt hash (chain link), receipt status, policy version metadata, and environment context.
 
 ### Key Management
 
-- Signing keys generated on first use via `Ed25519.generate_key_pair()`
-- Public key exportable for third-party verification
-- Key rotation supported through `rotate_key` action
-- Private key stored with restricted file permissions
+- Ed25519 keypair generated on first use
+- Private key stored at `~/.config/agentops/ed25519_private.key` (permissions 0o400)
+- Public key returned in every signed receipt for external verification
+- Key file location overridable via `AGENTOPS_KEY_DIR` environment variable
 
-## Transport Security
+## Transport Security (Enterprise)
+
+The Enterprise platform provides:
 
 - **TLS 1.3** (optional downgrade to 1.2 for legacy clients)
-- **HSTS preload** configured (can be disabled for internal CAs)
-- **HTTP Strict Transport Security** headers set
+- **HSTS preload** configured
+- **HTTP Strict Transport Security** headers
 - **WebSocket over WSS** with origin validation
-- **HTTP-to-HTTPS redirect** enforced when TLS is active
+- **HTTP-to-HTTPS redirect** when TLS is active
 
-### WebSocket Hardening
+### WebSocket Hardening (Enterprise)
 
 - Short-lived WS-specific tokens (5-minute TTL, separate signing secret)
 - Token rotation on reconnect (one-time use, replay rejected)
@@ -90,7 +105,7 @@ Every agent action produces a cryptographically signed receipt:
 - Origin header validation
 - Per-IP rate limiting: 20 connections per 60-second sliding window
 
-## API Hardening
+## API Hardening (Enterprise)
 
 - CSRF protection with SameSite=Strict cookies
 - Dynamic `secure` flag on cookies based on request scheme
@@ -104,17 +119,22 @@ Every agent action produces a cryptographically signed receipt:
 | Control | Community | Enterprise |
 |---------|-----------|------------|
 | Local-first deployment | Yes | Yes |
-| Auth default-deny | Yes | Yes |
-| Session-based auth (JWT) | Yes | Yes |
-| Brute force protection | Yes | Yes |
-| Workspace policy enforcement | Yes | Yes |
 | Ed25519-signed receipts | Yes | Yes |
-| Receipt chain verification | Yes | Yes |
-| Key rotation | Yes | Yes |
-| TLS 1.3 | Yes | Yes |
-| WebSocket hardening | Yes | Yes |
-| CSRF protection | Yes | Yes |
-| Rate limiting | Yes | Yes |
+| Receipt verification (MCP) | Yes | Yes |
+| Receipt verification (CLI) | Yes | Yes |
+| Policy enforcement (demo) | Yes | Yes |
+| Workspace path jail (demo) | Yes | Yes |
+| Persistent Ed25519 key | Yes | Yes |
+| Auth default-deny | N/A (no web UI) | Yes |
+| Session-based auth (JWT) | N/A (no web UI) | Yes |
+| Brute force protection | N/A (no web UI) | Yes |
+| Full workspace policy engine | No | Yes |
+| Receipt chain verification | No | Yes |
+| Key rotation | No | Yes |
+| TLS 1.3 / HSTS | No | Yes |
+| WebSocket hardening | N/A (no WS) | Yes |
+| CSRF protection | N/A (no API) | Yes |
+| Rate limiting | N/A (no API) | Yes |
 | SAML/OIDC single sign-on | No | Yes |
 | LDAP/AD integration | No | Yes |
 | Audit log export (Splunk, Datadog, syslog) | No | Yes |
