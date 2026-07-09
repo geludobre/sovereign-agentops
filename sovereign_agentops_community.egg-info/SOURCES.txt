@@ -1,0 +1,12 @@
+LICENSE.community
+README.md
+pyproject.toml
+sovereign_agentops_community.egg-info/PKG-INFO
+sovereign_agentops_community.egg-info/SOURCES.txt
+sovereign_agentops_community.egg-info/dependency_links.txt
+sovereign_agentops_community.egg-info/requires.txt
+sovereign_agentops_community.egg-info/top_level.txt
+tests/test_json_rpc.py
+tests/test_mcp_server.py
+tools/__init__.py
+tools/mcp_server.py
