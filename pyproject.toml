@@ -7,7 +7,10 @@ name = "sovereign-agentops-community"
 version = "2.0.0"
 description = "Runtime-agnostic governed agent execution — Community Edition"
 readme = "README.md"
-license = {file = "LICENSE.community"}
+license = {text = "Apache-2.0"}
+
+[tool.setuptools.license-files]
+paths = ["LICENSE.community"]
 requires-python = ">=3.10"
 dependencies = [
     "cryptography>=41.0.0",
