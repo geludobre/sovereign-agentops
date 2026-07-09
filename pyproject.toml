@@ -14,9 +14,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/FinBridge/sovereign-agentops"
-Documentation = "https://github.com/FinBridge/sovereign-agentops/tree/main/community/docs"
-Source = "https://github.com/FinBridge/sovereign-agentops"
+Homepage = "https://github.com/geludobre/sovereign-agentops"
+Documentation = "https://github.com/geludobre/sovereign-agentops/tree/main/community/docs"
+Source = "https://github.com/geludobre/sovereign-agentops"
 
 [project.optional-dependencies]
 dev = [
