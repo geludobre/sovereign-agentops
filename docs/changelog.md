@@ -2,6 +2,11 @@
 
 This page mirrors the [CHANGELOG.md](https://github.com/geludobre/sovereign-agentops-enterprise/blob/main/CHANGELOG.md) from the repository.
 
+## 2.1.5 (2026-07-10)
+
+- **CI auto-version bump** — PyPI version set from tag name, no more manual version bumps
+- **Serialized release jobs** — Fixed race condition between release-artifacts and publish-helm
+
 ## 2.1.1 (2026-07-10)
 
 - **Hosted documentation** — GitHub Pages at https://geludobre.github.io/sovereign-agentops/
