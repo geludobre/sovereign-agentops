@@ -2,6 +2,13 @@
 
 This page mirrors the [CHANGELOG.md](https://github.com/geludobre/sovereign-agentops-enterprise/blob/main/CHANGELOG.md) from the repository.
 
+## 2.1.6 (2026-07-10)
+
+- **Test-first publishing** — CI runs pytest with coverage enforcement before publishing
+- **Pre-release staging** — suffixed tags (rc/dev/alpha/beta) skip publishing
+- **Marketing README** — real PyPI/Docker/docs badges, Quick Install section
+- **Helm chart** — version bumped to 2.1.5, image tags synced
+
 ## 2.1.5 (2026-07-10)
 
 - **CI auto-version bump** — PyPI version set from tag name, no more manual version bumps
