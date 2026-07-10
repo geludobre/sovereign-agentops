@@ -2,9 +2,31 @@
 
 **Runtime-agnostic governed agent execution — demo and evaluation edition**
 
-![License](https://img.shields.io/badge/license-Apache%202.0-blue)
-![Version](https://img.shields.io/badge/version-2.0.0-lightgrey)
-![Build](https://img.shields.io/badge/build-passing-brightgreen)
+[![PyPI](https://img.shields.io/pypi/v/sovereign-agentops-community?color=blue)](https://pypi.org/project/sovereign-agentops-community/)
+[![Python](https://img.shields.io/pypi/pyversions/sovereign-agentops-community)](https://pypi.org/project/sovereign-agentops-community/)
+[![Docker Hub](https://img.shields.io/docker/v/geludobre/sovereign-agentops-community/latest?label=docker&logo=docker)](https://hub.docker.com/r/geludobre/sovereign-agentops-community)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE.community)
+[![Documentation](https://img.shields.io/badge/docs-github%20pages-brightgreen)](https://geludobre.github.io/sovereign-agentops/)
+[![GitHub](https://img.shields.io/github/stars/geludobre/sovereign-agentops?style=social)](https://github.com/geludobre/sovereign-agentops)
+
+## Quick Install
+
+```bash
+# PyPI (standalone CLI + MCP server)
+pip install sovereign-agentops-community
+
+# Docker
+docker pull geludobre/sovereign-agentops-community
+
+# From source
+git clone https://github.com/geludobre/sovereign-agentops.git
+cd community && pip install -e .
+
+# Full documentation
+# → https://geludobre.github.io/sovereign-agentops/
+```
+
+---
 
 ## What is this?
 
@@ -132,3 +154,13 @@ Enterprise Edition features require a commercial license from FinBridge.
 ---
 
 Built on the MCP protocol. Governance, not lock-in.
+
+---
+
+## Get Involved
+
+- **🐛 Report bugs** — [GitHub Issues](https://github.com/geludobre/sovereign-agentops/issues)
+- **📖 Read the docs** — [geludobre.github.io/sovereign-agentops/](https://geludobre.github.io/sovereign-agentops/)
+- **💬 Enterprise inquiries** — [Enterprise Edition](https://github.com/geludobre/sovereign-agentops-enterprise)
+- **📦 PyPI** — `pip install sovereign-agentops-community`
+- **🐳 Docker Hub** — `docker pull geludobre/sovereign-agentops-community`
