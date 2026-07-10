@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sovereign-agentops-community"
-version = "2.0.0"
+version = "2.1.1"
 description = "Runtime-agnostic governed agent execution — Community Edition"
 readme = "README.md"
 license = {text = "Apache-2.0"}
