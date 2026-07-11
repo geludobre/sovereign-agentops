@@ -8,7 +8,7 @@
 
 ## High-Level Design
 
-Sovereign AgentOps interposes a governed MCP tool layer between agent runtimes and infrastructure. Every agent action -- code read, shell command, network request, database query -- passes through policy enforcement and produces a signed execution receipt before reaching the target system.
+Autonomous Digital Organization Platform interposes a governed MCP tool layer between agent runtimes and infrastructure. Every agent action -- code read, shell command, network request, database query -- passes through policy enforcement and produces a signed execution receipt before reaching the target system.
 
 ```
 AGENT RUNTIMES

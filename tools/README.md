@@ -1,7 +1,7 @@
 # Demo MCP Tools — Community Edition
 
 Seven demonstration tools illustrating the governed-agent execution concept
-from the Sovereign AgentOps platform.
+from the Autonomous Digital Organization Platform.
 
 | Tool | Purpose |
 |------|---------|

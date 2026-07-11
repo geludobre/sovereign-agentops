@@ -9,7 +9,7 @@
 
 ## Reporting a Vulnerability
 
-The Sovereign AgentOps project takes security seriously. If you discover a
+The Autonomous Digital Organization Platform project takes security seriously. If you discover a
 security vulnerability, please **do not** file a public GitHub issue.
 
 Instead, send a description of the issue to the maintainers. You can expect:
@@ -27,7 +27,7 @@ Please include:
 
 ## Scope
 
-This security policy covers the Community Edition of Sovereign AgentOps
+This security policy covers the Community Edition of Autonomous Digital Organization Platform
 published at https://github.com/FinBridge/sovereign-agentops.
 
 Enterprise Edition customers should refer to their support agreement for

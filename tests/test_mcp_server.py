@@ -1,4 +1,4 @@
-"""Tests for the Sovereign AgentOps Community Edition MCP governance server."""
+"""Tests for the Autonomous Digital Organization Platform Community Edition MCP governance server."""
 import json
 import shutil
 import tempfile

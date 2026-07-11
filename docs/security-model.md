@@ -7,7 +7,7 @@
 
 ## Overview
 
-Sovereign AgentOps follows a defense-in-depth approach with local-first deployment, default-deny auth, workspace isolation, and cryptographic audit. The security model assumes the deployment environment is trusted (your hardware, your network) and focuses on preventing agent actions from violating operational policy.
+Autonomous Digital Organization Platform follows a defense-in-depth approach with local-first deployment, default-deny auth, workspace isolation, and cryptographic audit. The security model assumes the deployment environment is trusted (your hardware, your network) and focuses on preventing agent actions from violating operational policy.
 
 ## Local-First Deployment
 

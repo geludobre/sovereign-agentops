@@ -1,4 +1,4 @@
-# Sovereign AgentOps — Community Edition (Docker Compose demo)
+# Autonomous Digital Organization Platform — Community Edition (Docker Compose demo)
 # Quick start: docker compose up --build
 # Then test: echo '{"jsonrpc":"2.0","id":1,"method":"list_tools"}' \
 #   | docker exec -i agentops-demo python3 tools/mcp_server.py

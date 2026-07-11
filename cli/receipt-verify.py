@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify Sovereign AgentOps Ed25519-signed execution receipts.
+"""Verify Autonomous Digital Organization Platform Ed25519-signed execution receipts.
 
 Modes: display (default), --verify, --gen-demo.  Exit 0 = valid, 1 = invalid.
 Requires: cryptography  (pip install cryptography)
@@ -55,7 +55,7 @@ def display(receipt):
     body, sig = dict(receipt), receipt.get("signature", "")
     sig_short = sig if len(sig) < 80 else sig[:36] + "..." + sig[-8:]
     print("\n" + "=" * 64)
-    print("  SOVEREIGN AGENTOPS — EXECUTION RECEIPT")
+    print("  AUTONOMOUS DIGITAL ORGANIZATION PLATFORM — EXECUTION RECEIPT")
     print("=" * 64)
     for k in ("schema_version", "run_id", "workspace_id", "actor",
               "agent_runtime", "tool", "command", "timestamp"):
@@ -101,7 +101,7 @@ def gen_demo(dirpath):
 
 def main():
     ap = argparse.ArgumentParser(
-        description="Verify Sovereign AgentOps Ed25519-signed execution receipts.",
+        description="Verify Autonomous Digital Organization Platform Ed25519-signed execution receipts.",
         epilog=(
             "Examples:\n"
             "  %(prog)s f.json              display\n"

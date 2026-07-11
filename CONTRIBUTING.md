@@ -1,4 +1,4 @@
-# Contributing to Sovereign AgentOps
+# Contributing to Autonomous Digital Organization Platform
 
 ## Reporting Issues
 

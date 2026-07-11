@@ -1,5 +1,5 @@
 # =============================================================================
-# Sovereign AgentOps — Workspace Policy
+# Autonomous Digital Organization Platform — Workspace Policy
 # =============================================================================
 # Each workspace in the governed execution layer has an associated policy that
 # defines what commands, paths, and patterns are allowed or blocked.  All four

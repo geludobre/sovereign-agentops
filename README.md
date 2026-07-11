@@ -1,4 +1,4 @@
-# Sovereign AgentOps — Community Edition
+# Autonomous Digital Organization Platform — Community Edition
 
 **Runtime-agnostic governed agent execution — demo and evaluation edition**
 
@@ -30,12 +30,15 @@ cd community && pip install -e .
 
 ## What is this?
 
-A standalone demonstration server for the **governed MCP execution layer** concept.
-It provides 7 MCP tools that showcase policy enforcement, Ed25519-signed execution
-receipts, workspace path jailing, and local model routing — with **real
-cryptography**, not simulations.
+A **self-hosted** **MCP** governance server for **AI agents** — the Community Edition
+demonstrates **constitutional governance**, **Ed25519-signed audit trail**, and
+**EU AI Act**-aligned compliance tooling. It provides 7 MCP tools that showcase
+policy enforcement, Ed25519-signed execution receipts, workspace path jailing,
+and local model routing — with **real cryptography**, not simulations. Deploy
+fully offline, air-gapped, or behind your own firewall with zero external
+dependencies.
 
-The full **Enterprise platform** (98 MCP tools, 455+ endpoints, 91+ web UI tabs,
+The full **Enterprise platform** (91 MCP tools, 486 endpoints, 88 web UI tabs,
 constitutional governance, service catalogue, compliance automation, fleet
 command, agent-owned assets, digital twin simulation, and autonomous incident
 resolution) is available under a commercial license.
@@ -101,7 +104,7 @@ python3 cli/receipt-verify.py --verify path/to/receipt.json
 The server generates a fresh Ed25519 keypair on first run, stored at
 `~/.config/agentops/ed25519_private.key` (permissions `0o400`).
 
-## Why Sovereign AgentOps?
+## Why Autonomous Digital Organization Platform?
 
 Teams adopting AI coding agents in regulated environments need to control what
 commands agents can run, audit every action with cryptographic proof, and operate
@@ -119,7 +122,7 @@ stack.
 | Workspace path jail | Demo | Full enforcement |
 | Model routing heuristic | Demo | 15+ provider routing |
 | Signed audit log | In-memory | SQLite hash-chain |
-| **MCP tools** | 7 demo tools | **98 tools (93 static + 5 plugins)** |
+| **MCP tools** | 7 demo tools | **91 tools (91 static + 0 plugins)** |
 | **Constitutional governance** | No | 6-layer (Cortex, Policy, Autonomy, Memory, Federation) |
 | **Web UI** | No | 91+ tabs (Flask + SocketIO) |
 | **PostgreSQL / Redis persistence** | No | Yes |
