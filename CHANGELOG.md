@@ -1,5 +1,28 @@
 # Changelog
 
+## 2.4.1 (2026-07-12)
+
+### Platform
+
+- **N1 Keybinding Editor** — Unified keybinding registry for CodeMirror 6 + Monaco editors with localStorage and project settings.json persistence. 18 editor commands with full keyboard shortcut customization.
+- **N4 Extension Marketplace** — Complete plugin marketplace: PluginManifest, PluginRegistry with dependency resolution and semver support, GitHub-based registry index, 8 Flask API endpoints (search/featured/install/uninstall/updates/publish/dependencies/refresh), marketplace UI tab with search, filter, install, detail modal. Enterprise license gating for premium plugins.
+- **7 Autonomous Digital Organization Frontiers Complete** — Token Independence (semantic cache, local model runtime, intent router, predictive cache), Recursive Self-Improvement, Predictive Governance, Agent-Owned Assets, Self-Negotiating Treaties, Digital Twin Simulator, Autonomous Incident Resolution.
+- **3 Unreplicable Moats Built** — Governance Recipe Marketplace (4 built-in recipes: SOC2, PCI DSS, HIPAA, Startup + custom CRUD), Federation Starter Packs (quick_peer_setup 3-step handshake, LAN UDP discovery, 4 governance templates, bulk operations), Precedent Accelerator (trend analysis, auto-amendment speedup 3→2, drift detection, precedent search).
+- **Enterprise License Gating** — MCP-level tool filtering (_ENTERPRISE_TOOLS), Flask @require_license decorator with 10 feature tiers, /api/license/{status,features,activate} API endpoints, Ed25519 license verification.
+
+### Enterprise
+
+- All 5 enterprise-hardening sub-phases complete: SSO (OIDC/SAML/LDAP/Keycloak), HA clustering (Redis-backed session store, distributed task queue, leader election), Security CI (bandit/semgrep/ZAP), k6 load testing (5 scenarios: smoke/load/stress/soak/spike), Federation validation + chaos (17 integration tests).
+- 140 automated tests passing (unit + integration + chaos + load + federation).
+
+### Infrastructure
+
+- 91 MCP tools (91 static + 0 dynamic plugins), 486 API endpoints, 88 Web UI tabs, 8 background daemons.
+- PWA with service worker, offline support, install prompt, HTTPS/TLS via Nginx reverse proxy.
+- 5 agent runtimes governed uniformly: Claude Code, OpenCode, Direct MCP, Workflow Engine, Collaborator Desktop.
+
+---
+
 ## 2.0.0 (2026-07-08)
 
 ### Major
