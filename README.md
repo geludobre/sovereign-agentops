@@ -38,10 +38,10 @@ and local model routing — with **real cryptography**, not simulations. Deploy
 fully offline, air-gapped, or behind your own firewall with zero external
 dependencies.
 
-The full **Enterprise platform** (91 MCP tools, 486 endpoints, 88 web UI tabs,
-constitutional governance, service catalogue, compliance automation, fleet
-command, agent-owned assets, digital twin simulation, and autonomous incident
-resolution) is available under a commercial license.
+The full **Enterprise platform** (Protocol Consolidation — 94 MCP tools under one
+governed layer (90 static + 4 dynamic plugins), 495+ endpoints, 90 web UI tabs, constitutional governance, service
+catalogue, compliance automation, fleet command, agent-owned assets, digital twin
+simulation, and autonomous incident resolution) is available under a commercial license.
 
 ## Quickstart
 
@@ -122,9 +122,9 @@ stack.
 | Workspace path jail | Demo | Full enforcement |
 | Model routing heuristic | Demo | 15+ provider routing |
 | Signed audit log | In-memory | SQLite hash-chain |
-| **MCP tools** | 7 demo tools | **91 tools (91 static + 0 plugins)** |
+| **MCP tools** | 7 demo tools | **Protocol Consolidation — 94 tools (90 static + 4 plugins)** |
 | **Constitutional governance** | No | 6-layer (Cortex, Policy, Autonomy, Memory, Federation) |
-| **Web UI** | No | 91+ tabs (Flask + SocketIO) |
+| **Web UI** | No | Distributed Telemetry Panel — 90+ tabs (Flask + SocketIO) |
 | **PostgreSQL / Redis persistence** | No | Yes |
 | **Agent orchestration** | No | Capability registry, message bus, DAG |
 | **Service catalogue** | No | Auto-discovery, health, SLA |
@@ -143,9 +143,19 @@ stack.
 ## Documentation
 
 - [Architecture Overview](docs/architecture.md) — governance layer design
+- [Key Pillars](docs/key-pillars.md) — operational pillars and unreplicable moats
 - [Security Model](docs/security-model.md) — defense-in-depth architecture
 - [Contributing Guide](CONTRIBUTING.md) — how to contribute
 - [Changelog](CHANGELOG.md) — release history
+
+## Demo Videos
+
+See the platform in action:
+
+- **[5-Minute Executive Demo](https://github.com/geludobre/sovereign-agentops/raw/main/demos/SovereignAgentOps_Demo.mp4)** — constitutional governance, agent dispatch, compliance automation, and fleet command
+- **[3-Minute Technical Demo](https://github.com/geludobre/sovereign-agentops/raw/main/demos/SovereignAgentOps_Demo_Technical.mp4)** — MCP governance layer, signed receipts, workspace policy enforcement, and local model routing
+
+Both demos were recorded from the live platform with real Ed25519-signed execution receipts and real policy enforcement — no simulations.
 
 ## License
 

@@ -57,8 +57,8 @@ The Community Edition is a single-process MCP server (`tools/mcp_server.py`) tha
 
 The full Enterprise platform includes all Community Edition capabilities plus:
 
-- **98 MCP tools** (93 static + 5 dynamic plugins) across search, code, infra, security, network, data, AI, automation, governance, and operations domains
-- **Web UI** with 91+ tabs: Flask + SocketIO control panel with the Cortex organizational graph, Agents dashboard, IM Bridge, Orchestrator, Service Catalogue, Observability Hub, Governance Staging, Compliance Suite, Fleet Command
+- **94 MCP tools** (90 static + 4 dynamic plugins) across search, code, infra, security, network, data, AI, automation, governance, and operations domains
+- **Web UI** with 90+ tabs: Distributed Telemetry Panel (Flask + SocketIO) with the Cortex organizational graph, Agents dashboard, IM Bridge, Orchestrator, Service Catalogue, Observability Hub, Governance Staging, Compliance Suite, Fleet Command
 - **PostgreSQL 16** for persistent storage of workspaces, receipts, and metadata
 - **Redis 7** for session store, rate limiting, and pub/sub real-time events
 - **Constitutional Governance** — 6-layer platform: Cortex, Policy Constitution, Autonomy Charter, Org Memory (Neocortex), Treaty-Based Federation
@@ -101,7 +101,7 @@ No runtime is privileged. The same policies and receipts apply to all.
 
 ### Web UI (Enterprise)
 
-Flask + SocketIO control panel with 91+ tabs covering all MCP tool domains, the Cortex organizational graph, governance dashboards, compliance reports, fleet command, and more. Served via Nginx reverse proxy on port 443 (HTTPS) with HTTP-to-HTTPS redirect.
+Distributed Telemetry Panel (Flask + SocketIO) with 90+ tabs covering all MCP tool domains, the Cortex organizational graph, governance dashboards, compliance reports, fleet command, and more. Served via Nginx reverse proxy on port 443 (HTTPS) with HTTP-to-HTTPS redirect.
 
 ### Infrastructure Services (Enterprise)
 
@@ -141,7 +141,7 @@ the same governance concepts.
 
 | Point | Community | Enterprise |
 |-------|-----------|------------|
-| MCP protocol | 7 demo tools | 98 tools (93 static + 5 plugins) |
+| MCP protocol | 7 demo tools | 94 tools (90 static + 4 plugins) |
 | CLI tools | Receipt verification | Full suite |
 | Settings & PATH | User-configured | Managed platform-wide |
 | Memory system | -- | Cross-session knowledge graph (Neocortex) |
